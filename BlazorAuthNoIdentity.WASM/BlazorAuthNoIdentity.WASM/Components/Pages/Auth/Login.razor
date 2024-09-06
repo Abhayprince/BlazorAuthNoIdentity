@@ -1,0 +1,80 @@
+﻿@page "/auth/login"
+
+@using System.ComponentModel.DataAnnotations
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Authentication
+@inject NavigationManager NavigationManager
+
+<h3>Login Page</h3>
+
+<div class="row">
+    <div class="col-sm-5 mx-auto">
+        <EditForm Model="Model" method="Post" OnValidSubmit="LoginUserAsync" FormName="@LoginForm">
+            <DataAnnotationsValidator />
+            <div class="mb-3">
+                <label>Username</label>
+                <InputText @bind-Value="Model.Email" class="form-control" />
+                <ValidationMessage For="()=> Model.Email"/>
+            </div>
+            <div class="mb-3">
+                <label>Password</label>
+                <InputText type="password" @bind-Value="Model.Password" class="form-control" />
+                <ValidationMessage For="()=> Model.Password" />
+            </div>
+            <div class="mb-3">
+                <InputCheckbox @bind-Value="Model.RememberMe" class="form-check-input" />
+                Remember me
+            </div>
+            <div class="mb-3">
+                <button type="submit" class="btn btn-primary btn-sm">Login</button>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    private const string LoginForm = "login-form";
+
+    [SupplyParameterFromForm(FormName = LoginForm)]
+    private LoginModel Model { get; set; } = new();
+
+    [CascadingParameter]
+    public HttpContext HttpContext { get; set; } = default!;
+
+    [SupplyParameterFromQuery]
+    public string ReturnUrl { get; set; } = "/";
+
+    private async Task LoginUserAsync()
+    {
+        // Validate Model.Email and Model.Pssword against your database
+        await Task.Delay(2000);
+
+        LoggedInUserModel user = new LoggedInUserModel(1, "Abhay", "abcd@email.com");
+
+        var claims = user.ToClaims();
+        var identity = new ClaimsIdentity(claims, Constants.AuthScheme);
+        var principal = new ClaimsPrincipal(identity);
+
+        var authProperties = new AuthenticationProperties
+            {
+                IsPersistent = Model.RememberMe
+            };
+
+        await HttpContext.SignInAsync(Constants.AuthScheme, principal, authProperties);
+        NavigationManager.NavigateTo(ReturnUrl);
+    }
+
+    class LoginModel
+    {
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; } = "";
+
+        [Required]
+        [DataType(DataType.Password)]
+        public string Password { get; set; } = "";
+
+        [Display(Name = "Remember me?")]
+        public bool RememberMe { get; set; }
+    }
+}

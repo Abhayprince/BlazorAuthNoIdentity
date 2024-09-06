@@ -1,0 +1,29 @@
+﻿@page "/counter"
+@using System.Security.Claims
+@rendermode InteractiveServer
+
+<PageTitle>Counter</PageTitle>
+
+<AuthorizeView>
+    <Authorized>
+        <h1>Hello @context.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value</h1>
+    </Authorized>
+    <NotAuthorized>
+        <h1>Unknown user</h1>
+    </NotAuthorized>
+</AuthorizeView>
+
+<h1>Counter</h1>
+
+<p role="status">Current count: @currentCount</p>
+
+<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+
+@code {
+    private int currentCount = 0;
+
+    private void IncrementCount()
+    {
+        currentCount++;
+    }
+}

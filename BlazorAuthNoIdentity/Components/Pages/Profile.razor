@@ -1,0 +1,18 @@
+﻿@page "/profile"
+
+@using Microsoft.AspNetCore.Authorization
+@using System.Security.Claims
+
+@attribute [Authorize]
+
+<h3> Profile </h3>
+
+<AuthorizeView>
+    <Authorized>
+        <h1>Hello @context.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value</h1>
+    </Authorized>
+</AuthorizeView>
+
+@code {
+
+}
